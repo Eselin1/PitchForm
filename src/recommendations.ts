@@ -161,7 +161,7 @@ export function recommendSession(state: AppState, date = new Date()): Recommenda
       session: sessions[plannedToday.id],
       variant: plannedToday.variant ?? variant,
       reason: `${plannedToday.label} is the planned session for this match week setup.`,
-      caution: plannedToday.id.startsWith("lower") ? "Keep the primer version if your legs are heavy from practice, yard work, or soccer load." : "Keep reps clean and avoid grinding.",
+      caution: plannedToday.id.startsWith("lower") ? "Keep the primer version if your legs are heavy from practice, manual labor, or soccer load." : "Keep reps clean and avoid grinding.",
     };
   }
 

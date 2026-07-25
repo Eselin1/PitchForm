@@ -276,6 +276,15 @@ p {
   gap: 12px;
 }
 
+.date-time-grid {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+}
+
+.date-time-grid label,
+.date-time-grid input {
+  min-width: 0;
+}
+
 
 .section-head,
 .workout-head {
@@ -1160,6 +1169,10 @@ textarea {
 }
 
 @media (max-width: 430px) {
+  .date-time-grid {
+    grid-template-columns: 1fr;
+  }
+
   .tabbar button {
     font-size: 10px;
     gap: 4px;
@@ -1246,4 +1259,182 @@ textarea {
   .movement-fields strong {
     font-size: 12px;
   }
+}
+
+.appearance-control {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.segmented-control {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  border: 1px solid #d6d0c3;
+  border-radius: 8px;
+  background: #fbfaf6;
+  padding: 6px;
+}
+
+.segmented-control button {
+  min-height: 38px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #536158;
+  font-weight: 900;
+}
+
+.segmented-control button.active {
+  background: #17261f;
+  color: #fffdf8;
+}
+
+html[data-theme="dark"] {
+  color: #edf5ef;
+  background: #0e1512;
+}
+
+html[data-theme="dark"] body {
+  background:
+    linear-gradient(180deg, rgba(46, 72, 61, 0.28), rgba(14, 21, 18, 0) 280px),
+    #0e1512;
+  color: #edf5ef;
+}
+
+html[data-theme="dark"] .header-stat,
+html[data-theme="dark"] .hero-panel,
+html[data-theme="dark"] .workout-card,
+html[data-theme="dark"] .form-card,
+html[data-theme="dark"] .plain-panel,
+html[data-theme="dark"] .tabbar,
+html[data-theme="dark"] .calendar-day,
+html[data-theme="dark"] .history-item,
+html[data-theme="dark"] .set-row,
+html[data-theme="dark"] .movement-fields,
+html[data-theme="dark"] .watch-fields,
+html[data-theme="dark"] .toggle-row,
+html[data-theme="dark"] .selected-recommendation,
+html[data-theme="dark"] .rest-timer,
+html[data-theme="dark"] .plan-item,
+html[data-theme="dark"] .modal-panel,
+html[data-theme="dark"] .segmented-control {
+  border-color: #2c4036;
+  background: rgba(20, 31, 26, 0.94);
+  color: #edf5ef;
+}
+
+html[data-theme="dark"] .tabbar {
+  background: rgba(14, 21, 18, 0.92);
+}
+
+html[data-theme="dark"] .header-stat strong,
+html[data-theme="dark"] .selected-recommendation strong,
+html[data-theme="dark"] .history-item strong,
+html[data-theme="dark"] .workout-card h2,
+html[data-theme="dark"] .form-card h2,
+html[data-theme="dark"] .plain-panel h2,
+html[data-theme="dark"] .hero-copy h2,
+html[data-theme="dark"] .exercise-panel h3 {
+  color: #f6fbf8;
+}
+
+html[data-theme="dark"] .eyebrow,
+html[data-theme="dark"] .header-stat span,
+html[data-theme="dark"] .tabbar button,
+html[data-theme="dark"] .session-picker button,
+html[data-theme="dark"] .hero-copy p:last-child,
+html[data-theme="dark"] .plain-panel p,
+html[data-theme="dark"] .target,
+html[data-theme="dark"] .reason-box p,
+html[data-theme="dark"] .history-item p,
+html[data-theme="dark"] .history-item span,
+html[data-theme="dark"] .selected-recommendation p:last-child,
+html[data-theme="dark"] .rest-timer span,
+html[data-theme="dark"] .superset-note,
+html[data-theme="dark"] .action-select,
+html[data-theme="dark"] .calendar-weekday {
+  color: #a9b8af;
+}
+
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] .secondary-btn,
+html[data-theme="dark"] .backup-actions button,
+html[data-theme="dark"] .backup-actions label,
+html[data-theme="dark"] .day-actions button,
+html[data-theme="dark"] .plan-actions button,
+html[data-theme="dark"] .modal-actions button,
+html[data-theme="dark"] .entry-details summary,
+html[data-theme="dark"] .calendar-controls button,
+html[data-theme="dark"] .draft-actions button,
+html[data-theme="dark"] .update-strip button,
+html[data-theme="dark"] .storage-strip button,
+html[data-theme="dark"] .undo-strip button,
+html[data-theme="dark"] .summary-strip button {
+  border-color: #355247;
+  background: #101a16;
+  color: #edf5ef;
+}
+
+html[data-theme="dark"] .primary-btn,
+html[data-theme="dark"] .tabbar button.active,
+html[data-theme="dark"] .session-picker button.active,
+html[data-theme="dark"] .segmented-control button.active,
+html[data-theme="dark"] .draft-actions button:first-child {
+  border-color: #77c69a;
+  background: #77c69a;
+  color: #07110c;
+}
+
+html[data-theme="dark"] .metric-row span,
+html[data-theme="dark"] .rest,
+html[data-theme="dark"] .reason-box,
+html[data-theme="dark"] .resume-strip,
+html[data-theme="dark"] .update-strip,
+html[data-theme="dark"] .undo-strip,
+html[data-theme="dark"] .storage-strip,
+html[data-theme="dark"] .summary-strip {
+  border-color: #315544;
+  background: #14261d;
+  color: #dceee4;
+}
+
+html[data-theme="dark"] .reason-box.subtle,
+html[data-theme="dark"] .storage-strip {
+  border-color: #72552a;
+  background: #2b2217;
+}
+
+html[data-theme="dark"] .calendar-day.today {
+  border-color: #77c69a;
+}
+
+html[data-theme="dark"] .calendar-day.selected {
+  background: #77c69a;
+  color: #07110c;
+}
+
+html[data-theme="dark"] .calendar-day small,
+html[data-theme="dark"] .calendar-day b,
+html[data-theme="dark"] .progress-track div {
+  background: #77c69a;
+  color: #07110c;
+}
+
+html[data-theme="dark"] .progress-track {
+  background: #2b382f;
+}
+
+html[data-theme="dark"] .entry-actions button,
+html[data-theme="dark"] .draft-actions button:last-child {
+  border-color: #6d3a34;
+  background: #2a1715;
+  color: #f1a39a;
+}
+
+html[data-theme="dark"] .modal-backdrop {
+  background: rgba(3, 7, 5, 0.66);
 }

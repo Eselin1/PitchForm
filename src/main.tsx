@@ -340,6 +340,7 @@ function App() {
   const [undoNotice, setUndoNotice] = useState<UndoNotice | null>(null);
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
   const [storageWarning, setStorageWarning] = useState(false);
+  const [prefersDark, setPrefersDark] = useState(() => window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false);
   const [clockTick, setClockTick] = useState(Date.now());
   const recommendationRefreshKey = Math.floor(clockTick / (5 * 60 * 1000));
   const recommendation = useMemo(() => recommendSession(state, new Date()), [state, recommendationRefreshKey]);
@@ -353,6 +354,22 @@ function App() {
   useEffect(() => {
     setStorageWarning(!saveState(state));
   }, [state]);
+
+  useEffect(() => {
+    const query = window.matchMedia?.("(prefers-color-scheme: dark)");
+    if (!query) return;
+    const handleChange = () => setPrefersDark(query.matches);
+    handleChange();
+    query.addEventListener?.("change", handleChange);
+    return () => query.removeEventListener?.("change", handleChange);
+  }, []);
+
+  useEffect(() => {
+    const theme = state.settings.themeMode === "system" ? (prefersDark ? "dark" : "light") : state.settings.themeMode;
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#0e1512" : "#17261f");
+  }, [prefersDark, state.settings.themeMode]);
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
@@ -1107,7 +1124,7 @@ function TrainView(props: {
           <button className="secondary-btn" onClick={props.onAdvance} disabled={exerciseIndex === props.activeSession.exercises.length - 1}>Next Exercise</button>
         </div>
         <div className="rating-box">
-          <div className="field-grid">
+          <div className="field-grid date-time-grid">
             <label>Workout date<input type="date" value={todayKey(new Date(props.draft.originalDate ?? new Date().toISOString()))} onChange={(event) => props.onUpdateDraft({ originalDate: isoForDateKey(event.target.value, timeFromIso(props.draft.originalDate)), touched: true })} /></label>
             <label>Time<input type="time" value={timeFromIso(props.draft.originalDate)} onChange={(event) => props.onUpdateDraft({ originalDate: isoForDateKey(todayKey(new Date(props.draft.originalDate ?? new Date().toISOString())), event.target.value), touched: true })} /></label>
           </div>
@@ -1186,7 +1203,7 @@ function ActivityForm({ initialActivity, defaultDate, defaultType, onSave, onCan
       <div className="section-head"><div><p className="eyebrow">Activity Log</p><h2>Record Outside Load</h2></div><HeartPulse size={22} /></div>
       <form onSubmit={submit}>
         <label>Activity<select value={activity.activityType} onChange={(event) => update({ activityType: event.target.value as ActivityLog["activityType"] })}>{Object.entries(activityLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-        <div className="field-grid">
+        <div className="field-grid date-time-grid">
           <label>Date<input type="date" value={todayKey(new Date(activity.date))} onChange={(event) => update({ date: isoForDateKey(event.target.value, timeFromIso(activity.date)) })} /></label>
           <label>Time<input type="time" value={timeFromIso(activity.date)} onChange={(event) => update({ date: isoForDateKey(todayKey(new Date(activity.date)), event.target.value) })} /></label>
         </div>
@@ -1203,7 +1220,7 @@ function ActivityForm({ initialActivity, defaultDate, defaultType, onSave, onCan
             <label>Distance mi<input value={activity.distanceMiles} onChange={(event) => update({ distanceMiles: event.target.value })} inputMode="decimal" type="number" min="0" step="0.01" /></label>
           </div></div>
         ) : null}
-        <label>Notes<textarea value={activity.notes} onChange={(event) => update({ notes: event.target.value })} placeholder="Practice was tactical, yard work all day, cramped late..." /></label>
+        <label>Notes<textarea value={activity.notes} onChange={(event) => update({ notes: event.target.value })} placeholder="Practice was tactical, manual labor all day, cramped late..." /></label>
         <button className="primary-btn" type="submit"><Save size={20} /> {initialActivity ? "Update Activity" : "Save Activity"}</button>
         {initialActivity ? <button className="secondary-btn" type="button" onClick={() => { onCancel(); setActivity(emptyActivity(defaultDate, defaultType)); }}>Cancel Edit</button> : null}
       </form>
@@ -1216,7 +1233,7 @@ function RecentActivity({ state }: { state: AppState }) {
   return (
     <article className="plain-panel">
       <div className="section-head"><div><p className="eyebrow">Latest Load</p><h2>{latest ? latestLoadTitle(latest) : "Nothing logged yet"}</h2></div><CalendarDays size={20} /></div>
-      {latest ? <p>{latestLoadSummary(latest)}</p> : <p>Log practice, matches, pickup, conditioning, demanding yard work, or workouts so recommendations can adjust.</p>}
+      {latest ? <p>{latestLoadSummary(latest)}</p> : <p>Log practice, matches, pickup, conditioning, demanding manual labor, or workouts so recommendations can adjust.</p>}
     </article>
   );
 }
@@ -1300,6 +1317,14 @@ function SettingsView({ state, onExport, onImport, onReset, onUpdateSettings, on
         <button type="button" onClick={onExport}>Export Backup</button>
         <label>Import Backup<input type="file" accept="application/json" onChange={importBackup} /></label>
         <button type="button" onClick={onReset}>Reset App</button>
+      </div>
+      <div className="appearance-control">
+        <p className="eyebrow">Appearance</p>
+        <div className="segmented-control" role="group" aria-label="Appearance">
+          {(["system", "light", "dark"] as const).map((mode) => (
+            <button key={mode} type="button" className={state.settings.themeMode === mode ? "active" : ""} onClick={() => onUpdateSettings({ themeMode: mode })}>{mode === "system" ? "Auto" : mode === "light" ? "Light" : "Dark"}</button>
+          ))}
+        </div>
       </div>
       <label className="toggle-row">
         <input type="checkbox" checked={state.settings.timerAlerts} onChange={(event) => onUpdateSettings({ timerAlerts: event.target.checked })} />
