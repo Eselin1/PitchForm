@@ -340,7 +340,6 @@ function App() {
   const [undoNotice, setUndoNotice] = useState<UndoNotice | null>(null);
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
   const [storageWarning, setStorageWarning] = useState(false);
-  const [prefersDark, setPrefersDark] = useState(() => window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false);
   const [clockTick, setClockTick] = useState(Date.now());
   const recommendationRefreshKey = Math.floor(clockTick / (5 * 60 * 1000));
   const recommendation = useMemo(() => recommendSession(state, new Date()), [state, recommendationRefreshKey]);
@@ -355,21 +354,6 @@ function App() {
     setStorageWarning(!saveState(state));
   }, [state]);
 
-  useEffect(() => {
-    const query = window.matchMedia?.("(prefers-color-scheme: dark)");
-    if (!query) return;
-    const handleChange = () => setPrefersDark(query.matches);
-    handleChange();
-    query.addEventListener?.("change", handleChange);
-    return () => query.removeEventListener?.("change", handleChange);
-  }, []);
-
-  useEffect(() => {
-    const theme = state.settings.themeMode === "system" ? (prefersDark ? "dark" : "light") : state.settings.themeMode;
-    document.documentElement.dataset.theme = theme;
-    document.documentElement.style.colorScheme = theme;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#0e1512" : "#17261f");
-  }, [prefersDark, state.settings.themeMode]);
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
@@ -1317,14 +1301,6 @@ function SettingsView({ state, onExport, onImport, onReset, onUpdateSettings, on
         <button type="button" onClick={onExport}>Export Backup</button>
         <label>Import Backup<input type="file" accept="application/json" onChange={importBackup} /></label>
         <button type="button" onClick={onReset}>Reset App</button>
-      </div>
-      <div className="appearance-control">
-        <p className="eyebrow">Appearance</p>
-        <div className="segmented-control" role="group" aria-label="Appearance">
-          {(["system", "light", "dark"] as const).map((mode) => (
-            <button key={mode} type="button" className={state.settings.themeMode === mode ? "active" : ""} onClick={() => onUpdateSettings({ themeMode: mode })}>{mode === "system" ? "Auto" : mode === "light" ? "Light" : "Dark"}</button>
-          ))}
-        </div>
       </div>
       <label className="toggle-row">
         <input type="checkbox" checked={state.settings.timerAlerts} onChange={(event) => onUpdateSettings({ timerAlerts: event.target.checked })} />

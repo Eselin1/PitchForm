@@ -1,4 +1,4 @@
-import type { ActiveWorkoutDraft, ActivityLog, AppSettings, AppState, Effort, Legs, OptionalWeekDay, PlanOverride, SessionId, SetLog, ThemeMode, Variant, WeekDay, WeekPlan, WeekPlanRevision, WorkoutLog } from "./types";
+import type { ActiveWorkoutDraft, ActivityLog, AppSettings, AppState, Effort, Legs, OptionalWeekDay, PlanOverride, SessionId, SetLog, Variant, WeekDay, WeekPlan, WeekPlanRevision, WorkoutLog } from "./types";
 import { getMovements, getSessionVariant, sessions } from "./program";
 
 export const defaultWeekPlan: WeekPlan = {
@@ -16,7 +16,6 @@ export const defaultState: AppState = {
   planOverrides: {},
   settings: {
     timerAlerts: true,
-    themeMode: "system",
   },
 };
 
@@ -137,12 +136,7 @@ function normalizeSettings(value: unknown): AppSettings {
   const settings = value as Partial<AppSettings>;
   return {
     timerAlerts: typeof settings.timerAlerts === "boolean" ? settings.timerAlerts : defaultState.settings.timerAlerts,
-    themeMode: isThemeMode(settings.themeMode) ? settings.themeMode : defaultState.settings.themeMode,
   };
-}
-
-function isThemeMode(value: unknown): value is ThemeMode {
-  return value === "system" || value === "light" || value === "dark";
 }
 
 function normalizePlanOverrides(value: unknown): Record<string, Record<string, PlanOverride>> {

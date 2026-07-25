@@ -8,8 +8,6 @@ export type OptionalWeekDay = WeekDay | "none";
 export type Variant = "full" | "short" | "primer";
 export type Tab = "today" | "calendar" | "train" | "activity" | "history";
 export type PlanOverrideStatus = "skipped" | "replaced";
-export type ThemeMode = "system" | "light" | "dark";
-
 export type Movement = {
   id: string;
   name: string;
@@ -106,7 +104,6 @@ export type WeekPlanRevision = {
 
 export type AppSettings = {
   timerAlerts: boolean;
-  themeMode: ThemeMode;
 };
 
 export type ActiveWorkoutDraft = {
