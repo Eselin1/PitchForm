@@ -205,6 +205,10 @@ export function buildWeeklyPlan(state: AppState, date = new Date()): PlannedItem
 }
 
 function chooseTrainingDays(weekPlan: WeekPlan, date: Date): Record<SessionId, OptionalWeekDay> {
+  if (weekPlan.gameDay === "none") {
+    return chooseNoGameTrainingDays(weekPlan);
+  }
+
   if (weekPlan.practiceDay === 2 && weekPlan.gameDay === 0) {
     return {
       "lower-a": 3,
@@ -245,6 +249,38 @@ function chooseTrainingDays(weekPlan: WeekPlan, date: Date): Record<SessionId, O
     activation: dayBefore(weekPlan.gameDay),
     "zone-2": "none",
   };
+}
+
+function chooseNoGameTrainingDays(weekPlan: WeekPlan): Record<SessionId, OptionalWeekDay> {
+  if (weekPlan.practiceDay === 2) {
+    return {
+      "lower-a": 3,
+      "upper-a": 1,
+      "lower-b": 5,
+      "upper-b": 4,
+      activation: "none",
+      "zone-2": "none",
+    };
+  }
+
+  const used = new Set<WeekDay>([weekPlan.practiceDay]);
+  if (weekPlan.pickupDay !== "none") used.add(weekPlan.pickupDay);
+
+  return {
+    "upper-a": firstAvailableDay([1, 2, 3, 4, 5, 6, 0], used),
+    "lower-a": firstAvailableDay([3, 4, 1, 5, 6, 0, 2], used),
+    "upper-b": firstAvailableDay([4, 5, 6, 0, 2, 1, 3], used),
+    "lower-b": firstAvailableDay([5, 6, 0, 3, 4, 1, 2], used),
+    activation: "none",
+    "zone-2": "none",
+  };
+}
+
+function firstAvailableDay(days: WeekDay[], used: Set<WeekDay>): OptionalWeekDay {
+  const day = days.find((candidate) => !used.has(candidate));
+  if (day === undefined) return "none";
+  used.add(day);
+  return day;
 }
 
 function comparePlannedItems(a: PlannedItem, b: PlannedItem) {

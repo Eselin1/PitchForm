@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
-  Activity,
   CalendarDays,
   Check,
   ChevronLeft,
@@ -18,6 +17,7 @@ import {
   TimerReset,
   Trash2,
   Pencil,
+  Play,
 } from "lucide-react";
 import { getMovements, getSessionVariant, sessions } from "./program";
 import {
@@ -34,7 +34,7 @@ import {
   trainingWeekKey,
   workoutLoad,
 } from "./recommendations";
-import { defaultState, exportState, loadState, normalizeState, saveState, todayKey } from "./storage";
+import { defaultState, defaultWeekPlan, exportState, loadState, normalizeState, saveState, todayKey } from "./storage";
 import {
   dateForRecommendation,
   dateFromKey,
@@ -610,6 +610,13 @@ function App() {
     updateState(defaultState, { preserveUndo: true });
   }
 
+  function discardActiveDraft() {
+    if (!state.activeDraft) return;
+    if (!window.confirm("Discard the current workout draft?")) return;
+    setUndoNotice({ message: "Workout draft discarded.", previousState: state });
+    updateState((current) => ({ ...current, activeDraft: undefined }), { preserveUndo: true });
+  }
+
   function importBackupState(nextState: AppState) {
     setUndoNotice({ message: "Backup imported.", previousState: state });
     updateState(nextState, { preserveUndo: true });
@@ -617,13 +624,7 @@ function App() {
 
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div>
-          <p className="eyebrow">PitchForm</p>
-          <h1>Soccer S&C</h1>
-        </div>
-        <div className="date-pill">{new Date().toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}</div>
-      </header>
+      <AppHeader state={state} />
 
       <nav className="tabbar" aria-label="Primary">
         <button className={tab === "today" ? "active" : ""} onClick={() => setTab("today")}><Home size={18} /> Today</button>
@@ -675,6 +676,8 @@ function App() {
             setTab("activity");
           }}
           onResume={() => setTab("train")}
+          onSaveDraft={saveWorkout}
+          onDiscardDraft={discardActiveDraft}
         />
       )}
 
@@ -688,7 +691,7 @@ function App() {
             const revision = { plan: weekPlan, updatedAt: new Date().toISOString() };
             updateState((current) => ({
               ...current,
-              weekPlan: weekKey === trainingWeekKey() ? weekPlan : current.weekPlan,
+              weekPlan: defaultWeekPlan,
               weekPlans: { ...current.weekPlans, [weekKey]: weekPlan },
               weekPlanRevisions: {
                 ...current.weekPlanRevisions,
@@ -752,6 +755,26 @@ function App() {
       )}
     </main>
   );
+}
+
+function AppHeader({ state }: { state: AppState }) {
+  const latest = [...state.workouts, ...state.activities].sort((a, b) => b.date.localeCompare(a.date))[0];
+  return (
+    <header className="topbar">
+      <div className="brand-lockup">
+        <p className="eyebrow">PitchForm</p>
+      </div>
+      <div className="header-stats" aria-label="Training summary">
+        <HeaderStat label="Recent Load" value={`${recentLoad(state)}/12`} />
+        <HeaderStat label="Latest Load" value={latest ? latestLoadTitle(latest) : "None"} />
+        <HeaderStat label="Workouts Logged" value={state.workouts.length.toString()} />
+      </div>
+    </header>
+  );
+}
+
+function HeaderStat({ label, value }: { label: string; value: string }) {
+  return <div className="header-stat"><span>{label}</span><strong>{value}</strong></div>;
 }
 
 function UpdateBanner({ onUpdate, onDismiss }: { onUpdate: () => void; onDismiss: () => void }) {
@@ -820,15 +843,20 @@ function DraftConflictDialog({ currentTitle, nextTitle, completedSets, totalSets
   );
 }
 
-function TodayView({ state, recommendation, onStart, onLogMatch, onResume }: { state: AppState; recommendation: ReturnType<typeof recommendSession>; onStart: () => void; onLogMatch: () => void; onResume: () => void }) {
-  const load = recentLoad(state);
+function TodayView({ state, recommendation, onStart, onLogMatch, onResume, onSaveDraft, onDiscardDraft }: { state: AppState; recommendation: ReturnType<typeof recommendSession>; onStart: () => void; onLogMatch: () => void; onResume: () => void; onSaveDraft: () => void; onDiscardDraft: () => void }) {
   return (
     <section className="stack">
       {state.activeDraft?.touched ? (
         <article className="resume-strip">
-          <strong>Workout draft saved</strong>
-          <span>{sessions[state.activeDraft.sessionId].title} · {state.activeDraft.variant}</span>
-          <button onClick={onResume}>Resume</button>
+          <div>
+            <strong>Workout draft saved</strong>
+            <span>{sessions[state.activeDraft.sessionId].title} · {state.activeDraft.variant}</span>
+          </div>
+          <div className="draft-actions" aria-label="Workout draft actions">
+            <button type="button" onClick={onResume} aria-label="Resume workout"><Play size={18} /></button>
+            <button type="button" onClick={onSaveDraft} aria-label="Save workout draft"><Save size={18} /></button>
+            <button type="button" onClick={onDiscardDraft} aria-label="Discard workout draft"><Trash2 size={18} /></button>
+          </div>
         </article>
       ) : null}
       <article className="hero-panel">
@@ -850,11 +878,6 @@ function TodayView({ state, recommendation, onStart, onLogMatch, onResume }: { s
           <button className="primary-btn" onClick={onLogMatch}>Log Match Afterward <ChevronRight size={20} /></button>
         )}
       </article>
-      <section className="two-column">
-        <QuickStat label="Workouts logged" value={state.workouts.length.toString()} icon={<Dumbbell size={18} />} />
-        <QuickStat label="Activities logged" value={state.activities.length.toString()} icon={<Activity size={18} />} />
-        <QuickStat label="Recent load" value={`${load}/12`} icon={<Flame size={18} />} />
-      </section>
       <RecentActivity state={state} />
     </section>
   );
@@ -988,7 +1011,7 @@ function WeekView({ state, dateKey, onSave, onPlanOverride }: { state: AppState;
       <article className="plain-panel">
         <div className="section-head"><div><p className="eyebrow">Weekly Checklist</p><h2>{trainingWeekKey(selectedWeekDate) === trainingWeekKey() ? "This Week" : "Selected Week"}</h2></div><CalendarDays size={22} /></div>
         <div className="plan-list">
-          {buildWeeklyPlan(state, selectedWeekDate).map((item) => (
+          {buildWeeklyPlan(state, selectedWeekDate).filter((item) => item.id !== "practice" && item.id !== "pickup" && item.id !== "game").map((item) => (
             <div className={`plan-item ${item.status}`} key={`${item.id}-${item.day}`}>
               <span>{item.status === "complete" ? "Done" : item.status === "moved" ? "Moved" : item.status === "skipped" ? "Skipped" : item.status === "replaced" ? "Replaced" : item.status === "missed" ? "Missed" : item.status === "today" ? "Today" : item.status === "none" ? "Off" : "Open"}</span>
               <strong>{item.label}</strong>
@@ -1104,11 +1127,6 @@ function WeekSetup({ dateKey, weekPlan, onSave }: { dateKey: string; weekPlan: W
   return (
     <article className="form-card">
       <div className="section-head"><div><p className="eyebrow">{weekLabel}</p><h2>{formatWeekRange(dateKey)}</h2></div><CalendarDays size={22} /></div>
-      <div className="week-summary">
-        <span>Practice: {dayLabels[draft.practiceDay]}</span>
-        <span>Game: {draft.gameDay === "none" ? "No game" : dayLabels[draft.gameDay]}</span>
-        <span>Pickup: {draft.pickupDay === "none" ? "None" : dayLabels[draft.pickupDay]}</span>
-      </div>
       <div className="field-grid">
         <label>Team practice<select value={draft.practiceDay} onChange={(event) => setDraft((current) => ({ ...current, practiceDay: Number(event.target.value) as WeekDay }))}>{Object.entries(dayLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
         <label>Game day<select value={draft.gameDay} onChange={(event) => setDraft((current) => ({ ...current, gameDay: parseOptionalDay(event.target.value) }))}><option value="none">No game</option>{Object.entries(dayLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
@@ -1117,10 +1135,6 @@ function WeekSetup({ dateKey, weekPlan, onSave }: { dateKey: string; weekPlan: W
       <button className="primary-btn" onClick={() => onSave(dateKey, draft)}><Save size={20} /> Save Week</button>
     </article>
   );
-}
-
-function QuickStat({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
-  return <article className="stat-card"><div>{icon}</div><p>{label}</p><strong>{value}</strong></article>;
 }
 
 function SessionPicker({ activeSessionId, variant, dateKey, isoDate, onSelect }: { activeSessionId: SessionId; variant: Variant; dateKey: string; isoDate?: string; onSelect: (id: SessionId, variant: Variant, dateKey?: string, isoDate?: string) => void }) {
