@@ -171,6 +171,8 @@ p {
 .workout-card,
 .form-card,
 .plain-panel {
+  min-width: 0;
+  max-width: 100%;
   padding: 18px;
 }
 
@@ -272,8 +274,15 @@ p {
 .two-column,
 .field-grid {
   display: grid;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+}
+
+.field-grid > label {
+  min-width: 0;
 }
 
 .date-time-grid {
@@ -284,6 +293,17 @@ p {
 .date-time-grid input {
   min-width: 0;
   max-width: 100%;
+}
+
+.date-time-grid input[type="date"],
+.date-time-grid input[type="time"] {
+  display: block;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  text-align: left;
 }
 
 
@@ -430,6 +450,9 @@ form,
 .rating-box,
 .detail-list {
   display: grid;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   gap: 10px;
 }
 
@@ -545,7 +568,10 @@ label {
 input,
 select,
 textarea {
+  display: block;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   min-height: 42px;
   border: 1px solid #d6d0c3;
   border-radius: 8px;
@@ -1171,11 +1197,28 @@ textarea {
 
 @media (max-width: 520px) {
   .date-time-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .date-time-grid label {
+    overflow: hidden;
+  }
+
+  .date-time-grid input[type="date"],
+  .date-time-grid input[type="time"] {
+    width: calc(100% - 2px);
+    inline-size: calc(100% - 2px);
   }
 }
 
 @media (max-width: 430px) {
+  .hero-panel,
+  .workout-card,
+  .form-card,
+  .plain-panel {
+    padding: 14px;
+  }
+
   .tabbar button {
     font-size: 10px;
     gap: 4px;
