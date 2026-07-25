@@ -140,7 +140,7 @@ export function recommendSession(state: AppState, date = new Date()): Recommenda
   }
 
   if (effectiveDaysToGame === 0) {
-    return { session: matchDaySession, variant: "full", reason: "You have a match today. The priority is performance, not gym volume.", caution: "Log the match afterward with your Apple Watch summary and leg rating." };
+    return { session: matchDaySession, variant: "full", reason: "You have a match today. The priority is performance, not gym volume.", caution: "Log the match afterward with duration, effort, leg feel, and notes." };
   }
 
   if (effectiveDaysToGame === 1) {

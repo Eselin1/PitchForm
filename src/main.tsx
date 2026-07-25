@@ -871,7 +871,7 @@ function TodayView({ state, recommendation, onStart, onLogMatch, onResume, onSav
           <span>{recommendation.variant}</span>
         </div>
         <div className="reason-box"><strong>Why</strong><p>{recommendation.reason}</p></div>
-        <div className="reason-box subtle"><strong>Watch</strong><p>{recommendation.caution}</p></div>
+        <div className="reason-box subtle"><strong>Note</strong><p>{recommendation.caution}</p></div>
         {isTrainableSession(recommendation.session.id) ? (
           <button className="primary-btn" onClick={onStart}>Start Session <ChevronRight size={20} /></button>
         ) : (
@@ -1168,7 +1168,11 @@ function ActivityForm({ initialActivity, defaultDate, defaultType, onSave, onCan
   }, [defaultDate, defaultType, initialActivity]);
 
   function update(patch: Partial<ActivityLog>) {
-    setActivity((current) => ({ ...current, ...patch }));
+    setActivity((current) => ({
+      ...current,
+      ...patch,
+      ...(patch.activityType === "match" ? { averageHeartRate: "", maximumHeartRate: "", activeCalories: "", distanceMiles: "" } : {}),
+    }));
   }
 
   function submit(event: React.FormEvent) {
@@ -1191,12 +1195,14 @@ function ActivityForm({ initialActivity, defaultDate, defaultType, onSave, onCan
           <label>Effort<select value={activity.effort} onChange={(event) => update({ effort: event.target.value as Effort })}>{Object.entries(effortLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
         </div>
         <label>Legs afterward<select value={activity.legs} onChange={(event) => update({ legs: event.target.value as ActivityLog["legs"] })}>{Object.entries(legLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-        <div className="watch-fields"><p className="eyebrow">Optional Apple Watch Summary</p><div className="field-grid">
-          <label>Avg HR<input value={activity.averageHeartRate} onChange={(event) => update({ averageHeartRate: event.target.value })} inputMode="numeric" type="number" min="0" max="240" /></label>
-          <label>Max HR<input value={activity.maximumHeartRate} onChange={(event) => update({ maximumHeartRate: event.target.value })} inputMode="numeric" type="number" min="0" max="240" /></label>
-          <label>Calories<input value={activity.activeCalories} onChange={(event) => update({ activeCalories: event.target.value })} inputMode="numeric" type="number" min="0" /></label>
-          <label>Distance mi<input value={activity.distanceMiles} onChange={(event) => update({ distanceMiles: event.target.value })} inputMode="decimal" type="number" min="0" step="0.01" /></label>
-        </div></div>
+        {activity.activityType !== "match" ? (
+          <div className="watch-fields"><p className="eyebrow">Optional Apple Watch Summary</p><div className="field-grid">
+            <label>Avg HR<input value={activity.averageHeartRate} onChange={(event) => update({ averageHeartRate: event.target.value })} inputMode="numeric" type="number" min="0" max="240" /></label>
+            <label>Max HR<input value={activity.maximumHeartRate} onChange={(event) => update({ maximumHeartRate: event.target.value })} inputMode="numeric" type="number" min="0" max="240" /></label>
+            <label>Calories<input value={activity.activeCalories} onChange={(event) => update({ activeCalories: event.target.value })} inputMode="numeric" type="number" min="0" /></label>
+            <label>Distance mi<input value={activity.distanceMiles} onChange={(event) => update({ distanceMiles: event.target.value })} inputMode="decimal" type="number" min="0" step="0.01" /></label>
+          </div></div>
+        ) : null}
         <label>Notes<textarea value={activity.notes} onChange={(event) => update({ notes: event.target.value })} placeholder="Practice was tactical, yard work all day, cramped late..." /></label>
         <button className="primary-btn" type="submit"><Save size={20} /> {initialActivity ? "Update Activity" : "Save Activity"}</button>
         {initialActivity ? <button className="secondary-btn" type="button" onClick={() => { onCancel(); setActivity(emptyActivity(defaultDate, defaultType)); }}>Cancel Edit</button> : null}
@@ -1267,7 +1273,7 @@ function WorkoutDetails({ log }: { log: WorkoutLog }) {
 }
 
 function ActivityDetails({ log }: { log: ActivityLog }) {
-  const watchStats = [log.averageHeartRate ? `Avg HR ${log.averageHeartRate}` : "", log.maximumHeartRate ? `Max HR ${log.maximumHeartRate}` : "", log.activeCalories ? `${log.activeCalories} cal` : "", log.distanceMiles ? `${log.distanceMiles} mi` : ""].filter(Boolean);
+  const watchStats = log.activityType === "match" ? [] : [log.averageHeartRate ? `Avg HR ${log.averageHeartRate}` : "", log.maximumHeartRate ? `Max HR ${log.maximumHeartRate}` : "", log.activeCalories ? `${log.activeCalories} cal` : "", log.distanceMiles ? `${log.distanceMiles} mi` : ""].filter(Boolean);
   if (!watchStats.length && !log.notes) return null;
   return <details className="entry-details"><summary>Details</summary>{watchStats.length ? <p>{watchStats.join(" · ")}</p> : null}{log.notes ? <p>{log.notes}</p> : null}</details>;
 }
