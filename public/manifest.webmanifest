@@ -4,8 +4,8 @@
   "description": "A local-first soccer strength and conditioning planner.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f6f4ee",
-  "theme_color": "#f6f4ee",
+  "background_color": "#f6f4ef",
+  "theme_color": "#f6f4ef",
   "icons": [
     {
       "src": "/icon-192.png",
