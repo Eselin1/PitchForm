@@ -1129,7 +1129,7 @@ function WeekSetup({ dateKey, weekPlan, onSave }: { dateKey: string; weekPlan: W
     <article className="form-card">
       <div className="section-head"><div><p className="eyebrow">{weekLabel}</p><h2>{formatWeekRange(dateKey)}</h2></div><CalendarDays size={22} /></div>
       <div className="field-grid">
-        <label>Team practice<select value={draft.practiceDay} onChange={(event) => setDraft((current) => ({ ...current, practiceDay: Number(event.target.value) as WeekDay }))}>{Object.entries(dayLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+        <label>Team practice<select value={draft.practiceDay} onChange={(event) => setDraft((current) => ({ ...current, practiceDay: parseOptionalDay(event.target.value) }))}><option value="none">No practice</option>{Object.entries(dayLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
         <label>Game day<select value={draft.gameDay} onChange={(event) => setDraft((current) => ({ ...current, gameDay: parseOptionalDay(event.target.value) }))}><option value="none">No game</option>{Object.entries(dayLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
       </div>
       <label>Pickup<select value={draft.pickupDay} onChange={(event) => setDraft((current) => ({ ...current, pickupDay: parseOptionalDay(event.target.value) }))}><option value="none">None this week</option>{Object.entries(dayLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>

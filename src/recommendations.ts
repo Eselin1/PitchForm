@@ -147,7 +147,7 @@ export function recommendSession(state: AppState, date = new Date()): Recommenda
     return { session: sessions.activation, variant: "primer", reason: `Your ${dayLabels[weekPlan.gameDay as WeekDay]} match is tomorrow, so the goal is freshness.`, caution: "Skip heavy lower-body lifting inside 24 hours of a match." };
   }
 
-  if (day === weekPlan.practiceDay && !practiceAdjusted) {
+  if (weekPlan.practiceDay !== "none" && day === weekPlan.practiceDay && !practiceAdjusted) {
     return { session: sessions["zone-2"], variant: "primer", reason: "Team practice is the priority today.", caution: "Log the Apple Watch summary after practice." };
   }
 
@@ -173,7 +173,7 @@ export function recommendSession(state: AppState, date = new Date()): Recommenda
   const hasLowerWindow = effectiveDaysToGame === null || effectiveDaysToGame >= 3;
 
   if (!hasLowerA && hasLowerWindow) return { session: sessions["lower-a"], variant, reason: "Lower A is still open this week and you have enough space before the match.", caution: "Use short or primer if legs feel flat." };
-  if (!hasUpperA) return { session: sessions["upper-a"], variant, reason: `Upper body fits well around ${dayLabels[weekPlan.practiceDay]} practice.`, caution: "Leave 1-2 reps in reserve on pressing." };
+  if (!hasUpperA) return { session: sessions["upper-a"], variant, reason: weekPlan.practiceDay === "none" ? "Upper body fits well in this week without a team practice conflict." : `Upper body fits well around ${dayLabels[weekPlan.practiceDay]} practice.`, caution: "Leave 1-2 reps in reserve on pressing." };
   if (!hasLowerB && hasLowerWindow) return { session: sessions["lower-b"], variant, reason: "Lower B is the next missing strength priority this week.", caution: "If practice or work crushed your legs, run the short version." };
   if (day === weekPlan.pickupDay && !pickupAdjusted && !hasUpperB) return { session: sessions["upper-b"], variant, reason: "Pull-up work pairs well with pickup if you keep it crisp.", caution: "Keep legs fresh if the game moves earlier." };
   if (!hasUpperB) return { session: sessions["upper-b"], variant, reason: "Pull-up and upper-body work is the remaining low-fatigue strength priority.", caution: "Keep legs fresh if the game moves earlier." };
@@ -188,7 +188,7 @@ export function buildWeeklyPlan(state: AppState, date = new Date()): PlannedItem
   const items: PlannedItem[] = [
     { id: "lower-a", label: "Lower A", day: trainingDays["lower-a"], variant: "full", status: "upcoming" },
     { id: "upper-a", label: "Upper A", day: trainingDays["upper-a"], variant: "full", status: "upcoming" },
-    { id: "practice", label: "Team practice", day: weekPlan.practiceDay, status: "upcoming" },
+    { id: "practice", label: "Team practice", day: weekPlan.practiceDay, status: weekPlan.practiceDay === "none" ? "none" : "upcoming" },
     { id: "lower-b", label: "Lower B", day: trainingDays["lower-b"], variant: lowerBVariant(weekPlan, trainingDays["lower-b"], date), status: "upcoming" },
     { id: "upper-b", label: "Upper B", day: trainingDays["upper-b"], variant: "full", status: "upcoming" },
     { id: "pickup", label: "Pickup", day: weekPlan.pickupDay, status: "none" },
@@ -263,7 +263,8 @@ function chooseNoGameTrainingDays(weekPlan: WeekPlan): Record<SessionId, Optiona
     };
   }
 
-  const used = new Set<WeekDay>([weekPlan.practiceDay]);
+  const used = new Set<WeekDay>();
+  if (weekPlan.practiceDay !== "none") used.add(weekPlan.practiceDay);
   if (weekPlan.pickupDay !== "none") used.add(weekPlan.pickupDay);
 
   return {

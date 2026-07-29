@@ -86,7 +86,7 @@ export type ActivityLog = {
 };
 
 export type WeekPlan = {
-  practiceDay: WeekDay;
+  practiceDay: OptionalWeekDay;
   gameDay: OptionalWeekDay;
   pickupDay: OptionalWeekDay;
 };

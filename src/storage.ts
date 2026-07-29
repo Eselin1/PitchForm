@@ -50,7 +50,7 @@ export function normalizeState(value: unknown): AppState | null {
   if (!value || typeof value !== "object") return null;
   const candidate = value as Partial<AppState>;
   const importedWeekPlan = (candidate.weekPlan ?? {}) as Partial<WeekPlan>;
-  const practiceDay = isWeekDay(importedWeekPlan.practiceDay) ? importedWeekPlan.practiceDay : defaultWeekPlan.practiceDay;
+  const practiceDay = isOptionalWeekDay(importedWeekPlan.practiceDay) ? importedWeekPlan.practiceDay : defaultWeekPlan.practiceDay;
   const gameDay = isOptionalWeekDay(importedWeekPlan.gameDay) ? importedWeekPlan.gameDay : defaultWeekPlan.gameDay;
   const pickupDay = isOptionalWeekDay(importedWeekPlan.pickupDay) ? importedWeekPlan.pickupDay : defaultWeekPlan.pickupDay;
   const weekPlans = normalizeWeekPlans(candidate.weekPlans);
@@ -194,7 +194,7 @@ function isOptionalWeekDay(value: unknown): value is OptionalWeekDay {
 function isWeekPlan(value: unknown): value is WeekPlan {
   if (!value || typeof value !== "object") return false;
   const plan = value as Partial<WeekPlan>;
-  return isWeekDay(plan.practiceDay) && isOptionalWeekDay(plan.gameDay) && isOptionalWeekDay(plan.pickupDay);
+  return isOptionalWeekDay(plan.practiceDay) && isOptionalWeekDay(plan.gameDay) && isOptionalWeekDay(plan.pickupDay);
 }
 
 function isWeekPlanRevision(value: unknown): value is WeekPlanRevision {
