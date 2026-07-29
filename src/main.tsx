@@ -1057,7 +1057,7 @@ function TrainView(props: {
   const progression = progressionGuidance(props.state, props.draft.sessionId, props.draft.variant, props.currentExercise);
   return (
     <section className="stack">
-      <SessionPicker activeSessionId={props.draft.sessionId} variant={props.draft.variant} dateKey={todayKey(new Date(props.draft.originalDate ?? new Date().toISOString()))} isoDate={props.draft.originalDate} onSelect={props.onStartSession} />
+      <SessionPicker activeSessionId={props.draft.sessionId} variant={props.draft.variant} dateKey={todayKey()} onSelect={props.onStartSession} />
       <article className="workout-card">
         <div className="workout-head">
           <div><p className="eyebrow">{props.activeSession.category} · {props.draft.variant}</p><h2>{props.activeSession.title}</h2></div>

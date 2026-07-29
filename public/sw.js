@@ -1,5 +1,5 @@
 // Updated automatically before each production build so installed PWAs pick up new app shells.
-const CACHE_NAME = "pitchform-v20260729004952";
+const CACHE_NAME = "pitchform-v20260729005633";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/icon.svg", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png"];
 
 self.addEventListener("install", (event) => {
